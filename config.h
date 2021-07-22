@@ -20,7 +20,7 @@ static const char *colors[][3]      = {
 };
 
 /* tagging */
-static const char *tags[] = { "1", "2", "3", "4"};
+static const char *tags[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9"};
 
 static const Rule rules[] = {
 	/* xprop(1):
@@ -53,26 +53,41 @@ static const Layout layouts[] = {
 	{ MODKEY|ControlMask|ShiftMask, KEY,      toggletag,      {.ui = 1 << TAG} },
 
 /* helper for spawning shell commands in the pre dwm-5.0 fashion */
-#define SHCMD(cmd) { .v = (const char*[]){ "/usr//bin/alacritty", "-c", cmd, NULL } }
+#define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
+
+#define STATUSBAR "dwmblocks"
+
+#define STATUSBAR "dwmblocks"
 
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
 static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_cyan, "-sf", col_gray4, NULL };
+
 static const char *termcmd[]  = { "alacritty", NULL };
 
 /* Custom Include */
 #include<X11/XF86keysym.h>
 
+/* Control Media Players */
+
+static const char *medplaypausecmd[] = { "playerctl", "play-pause", NULL };
+static const char *mednextcmd[] = { "playerctl", "next", NULL };
+static const char *medprevcmd[] = { "playerctl", "previous", NULL };
+
+/* Spotify-adblock */
+/* static const char *spotifycmd[] = { "LD_PRELOAD=/usr/lib/spotify-adblock.so spotify", NULL }; */
+ 
+
 /* Brightness Controls */
 
-static const char *brupcmd[] = { "sudo", "xbacklight", "-inc", "10", NULL };
-static const char *brdowncmd[] = { "sudo", "xbacklight", "-dec", "10", NULL };
+static const char *brupcmd[] = { "xbacklight", "-inc", "5", NULL };
+static const char *brdowncmd[] = { "xbacklight", "-dec", "5", NULL };
 
 /* PulseAudio Controls */
 
-static const char *mutecmd[] = { "pactl", "set-sink-mute", "0", "toggle", NULL };
-static const char *volupcmd[] = { "pactl", "set-sink-volume", "0", "+5%", NULL };
-static const char *voldowncmd[] = { "pactl", "set-sink-volume", "0", "-5%", NULL };
+static const char *mutecmd[] = { "pactl", "set-sink-mute",      "1", "toggle", NULL };
+static const char *volupcmd[] = { "pactl", "set-sink-volume",   "1", "+5%", NULL };
+static const char *voldowncmd[] = { "pactl", "set-sink-volume", "1", "-5%", NULL };
 
 static Key keys[] = {
 	/* modifier                     key        function        argument */
@@ -110,23 +125,38 @@ static Key keys[] = {
 	TAGKEYS(                        XK_9,                      8)
 	{ MODKEY|ShiftMask,             XK_q,      quit,           {0} },
 
+/* Custom app for spotify-adblock */
+{ MODKEY|ShiftMask, XK_s, spawn, SHCMD("LD_PRELOAD=/usr/lib/spotify-adblock.so spotify") },
+/*{ MODKEY, XK_s, spawn, {.v = spotifycmd } }, */
+
+/* To take Screenshot using prt sc key */
+{ 0, XK_Print, spawn, SHCMD("xfce4-screenshooter") },
+
+/* Keybindings for Media play/pause/next/previous */
+
+{ 0, XF86XK_AudioPlay, spawn, {.v = medplaypausecmd } },
+{ 0, XF86XK_AudioNext, spawn, {.v = mednextcmd } },
+{ 0, XF86XK_AudioPrev, spawn, {.v = medprevcmd } },
+
 /* Keybinding for Volume and Brighness controls */
 { 0, XF86XK_AudioMute, spawn, {.v = mutecmd } },
 { 0, XF86XK_AudioLowerVolume, spawn, {.v = voldowncmd } },
 { 0, XF86XK_AudioRaiseVolume, spawn, {.v = volupcmd } },
 { 0, XF86XK_MonBrightnessUp, spawn, {.v = brupcmd} },
 { 0, XF86XK_MonBrightnessDown, spawn, {.v = brdowncmd} },
-
 };
 
 /* button definitions */
 /* click can be ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle, ClkClientWin, or ClkRootWin */
+
 static Button buttons[] = {
 	/* click                event mask      button          function        argument */
 	{ ClkLtSymbol,          0,              Button1,        setlayout,      {0} },
 	{ ClkLtSymbol,          0,              Button3,        setlayout,      {.v = &layouts[2]} },
 	{ ClkWinTitle,          0,              Button2,        zoom,           {0} },
-	{ ClkStatusText,        0,              Button2,        spawn,          {.v = termcmd } },
+	{ ClkStatusText,        0,              Button1,        sigstatusbar,   {.i = 1} }, 
+	{ ClkStatusText,        0,              Button2,        sigstatusbar,   {.i = 2} },
+	{ ClkStatusText,        0,              Button3,        sigstatusbar,   {.i = 3} },
 	{ ClkClientWin,         MODKEY,         Button1,        movemouse,      {0} },
 	{ ClkClientWin,         MODKEY,         Button2,        togglefloating, {0} },
 	{ ClkClientWin,         MODKEY,         Button3,        resizemouse,    {0} },
